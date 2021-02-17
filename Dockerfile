@@ -1,14 +1,16 @@
-FROM centos:7
-MAINTAINER Box Open Source "oss@box.com"
+FROM amazonlinux:2
+MAINTAINER Yappli SRE team  "team-sre@yappli.co.jp"
 
 COPY . /var/www/html
 WORKDIR /var/www/html
 
-RUN yum -y install http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm
 
-RUN yum -y install percona-toolkit mysql
+#RUN yum -y install http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm
+#RUN yum -y install percona-toolkit mysql-community-client python git nmap-ncat httpd php php-mysql php-bcmath php-xml
+
 RUN yum -y install python git nmap-ncat httpd php php-mysql php-bcmath php-xml
 
+RUN yum -y update && yum clean all 
 
 RUN cd /var/www/html && \
   curl -sS https://getcomposer.org/installer | php && \

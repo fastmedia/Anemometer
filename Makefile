@@ -4,7 +4,6 @@ DEPLOYDIR=$(shell mktemp -d)
 AWSCMD=aws
 LDFLAGS=-ldflags "-s -w"
 TAG=latest
-ECR_NAME_PREFIX=prod
 AWS_ACCOUNT_ID=804467274111
 APP_NAME=anemometer
 
@@ -15,8 +14,9 @@ build: ## Build app
 		docker build -t $(APP_NAME) -f ./Dockerfile .
 
 upload: build ## Deploy app
-		docker tag $(APP_NAME):latest $(AWS_ACCOUNT_ID).dkr.ecr.ap-northeast-1.amazonaws.com/$(ECR_NAME_PREFIX)-$(APP_NAME):$(TAG)
-			docker push $(AWS_ACCOUNT_ID).dkr.ecr.ap-northeast-1.amazonaws.com/$(ECR_NAME_PREFIX)-$(APP_NAME):$(TAG)
+		aws ecr get-login-password --region ap-northeast-1 --profile prod-dev | docker login --username AWS --password-stdin https://$(AWS_ACCOUNT_ID).dkr.ecr.ap-northeast-1.amazonaws.com
+		docker tag $(APP_NAME):latest $(AWS_ACCOUNT_ID).dkr.ecr.ap-northeast-1.amazonaws.com/$(APP_NAME):$(TAG)
+		docker push $(AWS_ACCOUNT_ID).dkr.ecr.ap-northeast-1.amazonaws.com/$(APP_NAME):$(TAG)
 
 .PHONY: help build upload
 	.DEFAULT_GOAL := help

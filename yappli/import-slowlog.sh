@@ -63,6 +63,7 @@ done
 ## import slowlog to db
 for TYPE in writer reader
 do
+  DB="slow_query_log_${TYPE}"
 
   for FILE in ${TMP_PREFIX}"."${TYPE}*
   do

@@ -9,8 +9,8 @@ LOG_GROUP=/aws/rds/cluster/prod-audience-crypted/slowquery
 TMP_PREFIX="/tmp/slowlog.$$"
 HOUR_PREV=$(TZ=UTC /bin/date +"%d/%m/%Y %H:" --date "${HOUR_OFFSET} hour ago")
 HOUR_NOW=$(TZ=UTC /bin/date +"%d/%m/%Y %H:")
-#PASS_SYS=xxxxxxxx
-#EP_W=prod-slowquery-rw.yapp.li
+PASS_SYS=$(aws s3 cp s3://prod-yappli-credentials/monitor/anemometer.json - | jq -r .password)
+EP_W=prod-slowquery-rw.yapp.li
 #DB="slow_query_log"
 
 ## get db instance type
@@ -42,7 +42,7 @@ do
   do
     START=${HOUR_PREV}${MIN_PREV}
     END=${HOUR_PREV}${MIN}
-    TMP_FILE=${TMP_PREFIX}"."${DBTYPE[$INSTANCE]}"."${MIN_PREV}
+    TMP_FILE=${TMP_PREFIX}"."${DBTYPE[$INSTANCE]}"."${MIN_PREV}"."${INSTANCE}
 
     echo $START
     awslogs  get  $LOG_GROUP  $LOG_STREAM  -G  -S  --start="$START" --end="$END" >> $TMP_FILE
@@ -52,7 +52,7 @@ do
 
   START=${HOUR_PREV}"55"
   END=${HOUR_NOW}"00"
-  TMP_FILE=${TMP_PREFIX}"."${DBTYPE[$INSTANCE]}".55"
+  TMP_FILE=${TMP_PREFIX}"."${DBTYPE[$INSTANCE]}".55""."${INSTANCE}
 
   echo $START
   awslogs  get  $LOG_GROUP  $LOG_STREAM  -G  -S  --start="$START" --end="$END" >> $TMP_FILE
@@ -68,11 +68,12 @@ do
   do
     echo "import $FILE"
     export PERL_LWP_SSL_VERIFY_HOSTNAME=0
+    INSTANCE=$(basename $FILE | sed -e 's/^.*\.//')
     pt-query-digest --user=anemometer --password=$PASS_SYS \
                     --review h=${EP_W},D=${DB},t=global_query_review \
                     --history h=${EP_W},D=${DB},t=global_query_review_history \
                     --no-report --limit=0% \
-                    --filter=" \$event->{Bytes} = length(\$event->{arg}) and \$event->{hostname}=\"${TYPE}\"" \
+                    --filter=" \$event->{Bytes} = length(\$event->{arg}) and \$event->{hostname}=\"${INSTANCE}\"" \
 		    $FILE
   done
 done

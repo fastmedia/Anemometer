@@ -11,7 +11,7 @@ HOUR_PREV=$(TZ=UTC /bin/date +"%d/%m/%Y %H:" --date "${HOUR_OFFSET} hour ago")
 HOUR_NOW=$(TZ=UTC /bin/date +"%d/%m/%Y %H:")
 #PASS_SYS=xxxxxxxx
 #EP_W=prod-slowquery-rw.yapp.li
-DB="slow_query_log"
+#DB="slow_query_log"
 
 ## get db instance type
 WRITERS=$(aws rds describe-db-clusters --db-cluster-identifier ${CLUSTER} | jq -cr '.DBClusters[].DBClusterMembers[] | [.DBInstanceIdentifier, .IsClusterWriter] | @tsv' | grep true | awk '{print $1}')
@@ -35,7 +35,7 @@ do
   echo $INSTANCE / ${DBTYPE[$INSTANCE]}
 
   LOG_STREAM=${INSTANCE}
-  #DB="slow_query_log_${DBTYPE[$INSTANCE]}"
+  DB="slow_query_log_${DBTYPE[$INSTANCE]}"
 
   MIN_PREV="00"
   for MIN in 05 10 15 20 25 30 35 40 45 50 55

@@ -1,9 +1,9 @@
 #!/bin/bash
 
 ## env
-HOUR_OFFSET=1
-#for HOUR_OFFSET in `seq 7`
-#do
+#HOUR_OFFSET=1
+for HOUR_OFFSET in `seq 1 17`
+do
 CLUSTER="prod-audience-crypted"
 LOG_GROUP=/aws/rds/cluster/prod-audience-crypted/slowquery
 TMP_PREFIX="/tmp/slowlog.$$"
@@ -81,4 +81,5 @@ done
 
 rm ${TMP_PREFIX}*
 
-#done
+sleep 30
+done
